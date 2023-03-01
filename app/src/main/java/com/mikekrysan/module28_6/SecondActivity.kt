@@ -2,10 +2,7 @@ package com.mikekrysan.module28_6
 
 import android.app.Activity
 import android.os.Bundle
-import android.transition.Fade
-import android.transition.Slide
-import android.transition.Transition
-import android.transition.TransitionManager
+import android.transition.*
 import android.view.Gravity
 import android.view.View
 import android.view.Window
@@ -62,16 +59,30 @@ class SecondActivity: Activity() {
             addListener(onStart = {
                 val slide = Slide()
                 image.visibility = View.INVISIBLE
-                TransitionManager.beginDelayedTransition(root, slide)
+                TransitionManager.beginDelayedTransition(root1, slide)
                 image.visibility = View.VISIBLE
             })
             //5 end
         }
         // 4) setup returnTransition
-        window.returnTransition = Slide(Gravity.END).apply {
-            mode = Slide.MODE_OUT;
-            excludeTarget(android.R.id.statusBarBackground, true)
-            excludeTarget(android.R.id.navigationBarBackground, true)
+        //В таком возврате текст будет "пролетать" по экрану, что является некорректным поведением. Для того, чтобы изображение подчинялось определенному переходу, для него добавляется собственный переход:
+//        window.returnTransition = Slide(Gravity.END).apply {
+//            mode = Slide.MODE_OUT;
+//            excludeTarget(android.R.id.statusBarBackground, true)
+//            excludeTarget(android.R.id.navigationBarBackground, true)
+//        }
+        window.returnTransition = TransitionSet().apply {
+            addTransition(Slide().apply {
+                mode = Slide.MODE_OUT
+                addTarget(image)
+                removeTarget(root)
+            })
+            addTransition(Slide(Gravity.END).apply {
+                mode = Slide.MODE_OUT;
+                excludeTarget(android.R.id.statusBarBackground, true)
+                excludeTarget(android.R.id.navigationBarBackground, true)
+            })
+            ordering = TransitionSet.ORDERING_TOGETHER
         }
     }
 }
